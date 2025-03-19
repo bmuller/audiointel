@@ -29,9 +29,7 @@ class Listener:
 
     async def wait_for(self, word):
         loop = audio_buffer_generator(2, self.sample_rate, self.channels)
-        async for buff, status in loop:
-            if status is not None:
-                logger.warn(status)
+        async for buff, _status in loop:
             text = self.transcribe(buff)
             # TODO - use a sentence tokenizer here
             if text and word.lower() in text.lower():
@@ -39,9 +37,7 @@ class Listener:
 
     async def record_input(self, maxtime=30, pause=2):
         loop = audio_buffer_generator(maxtime, self.sample_rate, self.channels)
-        async for buff, status in loop:
-            if status is not None:
-                logger.warn(status)
+        async for buff, _status in loop:
             seconds = np.ceil(len(buff) / float(self.sample_rate))
 
             # if we reached our max time, return what we have

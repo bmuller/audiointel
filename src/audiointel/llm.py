@@ -1,5 +1,6 @@
 import logging
 
+from langchain_core.prompts import PromptTemplate
 from langchain_ollama import OllamaLLM
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,8 @@ class LLMHelper:
 
     async def to_boolean(self, text):
         logger.debug("Attempting to coerce the following to boolean: %s", text)
-        result = await self.model.ainvoke(BOOL_PROMPT.format(input=text))
+        prompt = PromptTemplate.from_template(BOOL_PROMPT).format(input=text)
+        result = await self.model.ainvoke(prompt)
         fresult = result.strip()
         if fresult not in ["Yes", "No"]:
             logger.debug("Could not turn input into boolean: %s", fresult)

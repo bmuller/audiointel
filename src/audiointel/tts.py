@@ -3,6 +3,7 @@ import os
 
 import numpy as np
 from kokoro_onnx import Kokoro
+from nltk.tokenize import sent_tokenize
 
 from .audioio import play_buffer
 from .network import download
@@ -15,7 +16,7 @@ MODEL_FILE_SOURCE = (
 )
 VOICES_FILE_SOURCE = (
     "https://github.com/thewh1teagle/kokoro-onnx/releases/download/model-files-v1.0/voices-v1.0.bin",
-    "d19762d46cf0e6648cb28a7711df1637aad15818185d13f4ff840d57f2f6dfed",
+    "bca610b8308e8d99f32e6fe4197e7ec01679264efed0cac9140fe9c29f1fbf7d",
 )
 
 
@@ -31,6 +32,13 @@ class Speaker:
         self.lang = lang
 
     async def say(self, msg):
+        if len(msg) > 50:
+            for sentence in sent_tokenize(msg):
+                await self._say(sentence.strip())
+        else:
+            await self._say(msg.strip())
+
+    async def _say(self, msg):
         samples, sample_rate = self.model.create(
             msg, voice=self.voice, speed=self.speed, lang=self.lang
         )

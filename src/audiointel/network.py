@@ -17,8 +17,7 @@ def download(url, root, expected_sha256):
 
     if os.path.isfile(download_target):
         with open(download_target, "rb") as f:
-            model_bytes = f.read()
-            if hashlib.sha256(model_bytes).hexdigest() == expected_sha256:
+            if hashlib.file_digest(f, "sha256").hexdigest() == expected_sha256:
                 return download_target
             else:
                 logger.warn(
@@ -41,7 +40,7 @@ def download(url, root, expected_sha256):
                 loop.update(len(buffer))
 
     with open(download_target, "rb") as f:
-        if hashlib.file_digest(f, "sha256") != expected_sha256:
+        if hashlib.file_digest(f, "sha256").hexdigest() != expected_sha256:
             msg = f"{download_target} downloaded but SHA256 checksum comparison failed"
             raise RuntimeError(msg)
 

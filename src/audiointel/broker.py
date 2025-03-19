@@ -16,8 +16,13 @@ class Broker:
         self.llm = LLMHelper()
 
     async def say(self, msg):
-        logger.debug("Saying: %s", msg)
-        return await self.speaker.say(msg)
+        smsg = msg.strip()
+        logger.debug("Saying: %s", smsg)
+        return await self.speaker.say(smsg)
+
+    async def say_error(self, msg):
+        await play_sound(Sounds.ERROR)
+        await self.say(msg)
 
     async def wait_for_word(self, word):
         logger.debug("Waiting for word: %s", word)
@@ -38,8 +43,7 @@ class Broker:
         text = await self.ask(question)
         result = await self.llm.to_boolean(text)
         while result is None and (max_attempts is None or attempts <= max_attempts):
-            await play_sound(Sounds.ERROR)
-            await self.say("Please respond with a yes or no.")
+            await self.say_error("Please respond with a yes or no.")
             attempts += 1
             text = await self.ask(question)
             result = await self.llm.to_boolean(text)
@@ -53,8 +57,9 @@ class Broker:
         return text
 
     async def wake_listen_loop(self, maxtime=30, pause=2):
-        await self.wait_for_word(self.wake_word)
-        await play_sound(Sounds.WAKEUP)
-        text = await self.record_input(maxtime, pause)
-        await play_sound(Sounds.THINKING)
-        yield text
+        while True:
+            await self.wait_for_word(self.wake_word)
+            await play_sound(Sounds.WAKEUP)
+            text = await self.record_input(maxtime, pause)
+            await play_sound(Sounds.THINKING)
+            yield text
